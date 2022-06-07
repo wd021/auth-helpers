@@ -47,6 +47,7 @@
     },
     "dependencies": {
         "@supabase/auth-helpers-shared": "workspace:*",
-        "@supabase/supabase-js": "^1.35.3"
+        "@supabase/supabase-js": "^1.35.3",
+        "dequal": "^2.0.2"
     }
 }

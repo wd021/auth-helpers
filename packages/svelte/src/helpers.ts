@@ -5,10 +5,12 @@ import {
 } from '@supabase/auth-helpers-shared';
 import type { UserFetcher } from '@supabase/auth-helpers-shared';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
-import { setUser, setAccessToken, setError, type UserExtra } from './store';
+import type { UserExtra } from './store';
+import { type Writable, get } from 'svelte/store';
+import { dequal } from 'dequal';
 
 let networkRetries = 0;
-let refreshTokenTimer: number;
+let refreshTokenTimer: ReturnType<typeof setTimeout>;
 
 const handleError = async (error: Response) => {
   if (typeof error.json !== 'function') {
@@ -38,15 +40,38 @@ export const userFetcher: UserFetcher = async (url) => {
     : { user: null, accessToken: null, error: await handleError(response) };
 };
 
+let session: CheckSessionArgs["session"];
+
+export const setUserAndAccessToken = (session: CheckSessionArgs["session"], user: User, accessToken: string) => {
+  const currentSession = get(session);
+  const currentUser = currentSession.user;
+  const currentAccessToken = currentSession.accessToken;
+  console.log(`setAccessToken outside...`, {
+    currentAccessToken,
+    currentAccessTokenIsEqual: dequal(currentAccessToken, accessToken)
+  });
+  if (!dequal(currentUser, user) || !dequal(currentAccessToken, accessToken)) {
+    session.update((sess) => ({ ...sess, accessToken }))
+  }
+}
+
+export const setError = (session: CheckSessionArgs["session"], error: Error | null) => {
+  console.log(`setError...`);
+  session.update((sess) => ({ ...sess, error }))
+}
+
 export interface Session {
-  user: User;
+  user?: User;
   accessToken?: string;
+  isLoading?: boolean;
+  error?: Error | null;
 }
 
 interface CheckSessionArgs {
   profileUrl: string;
   autoRefreshToken: boolean;
   supabaseClient: SupabaseClient;
+  session: Writable<Session>;
 }
 
 let profileUrl: CheckSessionArgs["profileUrl"];
@@ -54,10 +79,16 @@ let autoRefreshToken: CheckSessionArgs["autoRefreshToken"];
 let supabaseClient: CheckSessionArgs["supabaseClient"];
 
 export const checkSession = async (props: CheckSessionArgs): Promise<void> => {
-  if (!profileUrl || !autoRefreshToken || !supabaseClient) {
+  try {
+    get(props.session)
+  } catch (e) {
+    console.log({ e })
+  }
+  if (!profileUrl || !autoRefreshToken || !supabaseClient || !session) {
     profileUrl = props.profileUrl;
     autoRefreshToken = props.autoRefreshToken;
     supabaseClient = props.supabaseClient;
+    session = props.session;
   }
 
   try {
@@ -72,14 +103,17 @@ export const checkSession = async (props: CheckSessionArgs): Promise<void> => {
         );
         return;
       }
-      setError(new Error(error));
+      setError(session, new Error(error));
     }
     networkRetries = 0;
+    console.log(`checkSession before setUserAndAccessToken: `, {
+      user,
+      accessToken
+    });
     if (accessToken) {
       supabaseClient.auth.setAuth(accessToken);
-      setAccessToken(accessToken);
     }
-    setUser(user);
+    setUserAndAccessToken(session, user, accessToken);
 
     // Set up auto token refresh
     if (autoRefreshToken) {
@@ -96,6 +130,7 @@ export const checkSession = async (props: CheckSessionArgs): Promise<void> => {
     }
   } catch (_e) {
     const err = new Error(`The request to ${profileUrl} failed`);
-    setError(err);
+    console.log({ error: _e });
+    setError(session, err);
   }
 };

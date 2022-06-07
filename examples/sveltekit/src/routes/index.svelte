@@ -1,6 +1,6 @@
 <script>
 	import Auth from 'supabase-ui-svelte';
-	import { error, isLoading } from '@supabase/auth-helpers-svelte';
+	// import { error, isLoading } from '@supabase/auth-helpers-svelte';
 	import { supabaseClient } from '$lib/db';
 	import { session } from '$app/stores';
 
@@ -12,6 +12,7 @@
 
 	$: {
 		if ($session.user && $session.user.id) {
+			console.log('index.svelte: ', $session);
 			loadData();
 		}
 	}
@@ -21,10 +22,10 @@
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
 {#if !$session.user}
-	{#if $error}
-		<p>{$error.message}</p>
+	{#if $session.error}
+		<p>{$session.error.message}</p>
 	{/if}
-	<h1>{$isLoading ? `Loading...` : `Loaded!`}</h1>
+	<h1>{$session.isLoading ? `Loading...` : `Loaded!`}</h1>
 	<Auth {supabaseClient} providers={[]} />
 {:else}
 	<p>
@@ -36,7 +37,7 @@
 	</p>
 
 	<button on:click={async () => await supabaseClient.auth.signOut()}>Sign out</button>
-	<h1>{$isLoading ? `Loading...` : `Loaded!`}</h1>
+	<h1>{$session.isLoading ? `Loading...` : `Loaded!`}</h1>
 	<p>user:</p>
 	<pre>{JSON.stringify($session.user, null, 2)}</pre>
 	<p>client-side data fetching with RLS</p>
