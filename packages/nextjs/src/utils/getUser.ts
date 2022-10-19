@@ -83,6 +83,15 @@ export default async function getUser(
       // JWT is expired, let's refresh from Gotrue
       if (!refresh_token) throw new RefreshTokenNotFound();
       logger.info('Refreshing access token...');
+
+      // TEMP FIX: Needs to use access_token in request
+      // TODO: Migrate to supabase 2.0
+      supabase.auth.api.headers = {
+        "X-Client-Info": `${PKG_NAME}@${PKG_VERSION}`,
+        Authorization: `Bearer ${access_token}`,
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      };
+
       const { data, error } = await supabase.auth.api.refreshAccessToken(
         refresh_token
       );
