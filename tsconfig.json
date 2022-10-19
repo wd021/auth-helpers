@@ -1,10 +1,9 @@
 {
-  "files": [],
-  "references": [
-    { "path": "packages/react" },
-    { "path": "packages/nextjs" },
-    { "path": "packages/shared" },
-    { "path": "packages/svelte" },
-    { "path": "packages/sveltekit" }
-  ]
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "incremental": false,
+    "importHelpers": true
+  },
+  "include": ["src", "src/middleware"],
+  "exclude": ["node_modules"]
 }

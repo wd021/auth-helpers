@@ -1,38 +1,45 @@
 {
-  "name": "@supabase/auth-helpers",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@supabase/auth-helpers-nextjs",
+  "version": "0.2.9",
+  "description": "A collection of framework specific Auth utilities for working with Supabase.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "turbo run build",
-    "build:example": "turbo run build:example",
-    "build:example:sveltekit": "turbo run build:example --filter=@example/sveltekit",
-    "build:example:nextjs": "turbo run build:example --filter=@example/nextjs",
-    "build:sveltekit": "turbo run build --filter=@supabase/auth-helpers-sveltekit",
-    "build:sveltekit:watch": "turbo run build:watch --filter=@supabase/auth-helpers-sveltekit",
-    "build:nextjs": "turbo run build --filter=@supabase/auth-helpers-nextjs",
-    "build:react": "turbo run build --filter=@supabase/auth-helpers-react",
-    "build:shared": "turbo run build --filter=@supabase/auth-helpers-shared",
-    "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "docs": "typedoc",
-    "clean:all": "turbo run clean:all",
-    "ci:version": "changeset version",
-    "ci:release": "changeset publish"
+    "build": "pnpm run make:constants && tsup",
+    "clean": "rimraf dist",
+    "clean:all": "rimraf dist node_modules",
+    "make:constants": "node ./scripts/make_constants.cjs > src/constants.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supabase/auth-helpers.git"
+  },
+  "keywords": [
+    "Supabase",
+    "Auth",
+    "Nextjs"
+  ],
+  "author": "Supabase",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/supabase/auth-helpers/issues"
+  },
+  "homepage": "https://github.com/supabase/auth-helpers/tree/main/packages/nextjs#readme",
   "devDependencies": {
-    "@changesets/cli": "^2.22.0",
-    "prettier": "^2.5.1",
-    "turbo": "latest",
-    "typedoc": "^0.22.17",
-    "typescript": "4.0.x || 4.1.x || 4.2.x || 4.3.x || 4.4.x || 4.5.x || 4.6.x"
+    "@supabase/supabase-js": "^1.35.3",
+    "config": "workspace:*",
+    "next": "^12.2.5",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "rimraf": "^3.0.2",
+    "tsconfig": "workspace:*",
+    "tslib": "^2.3.1",
+    "tsup": "^5.12.5"
   },
-  "engines": {
-    "npm": ">=7.0.0",
-    "node": ">=16.0.0"
-  },
-  "packageManager": "pnpm@7.1.7",
-  "peerDependencies": {
-    "typescript": "4.0.x || 4.1.x || 4.2.x || 4.3.x || 4.4.x || 4.5.x || 4.6.x"
+  "dependencies": {
+    "@supabase/auth-helpers-shared": "workspace:*"
   }
 }
